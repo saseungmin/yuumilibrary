@@ -8,6 +8,7 @@
 - html / css 
 - database (Oracle sql developer)
 - svn에서 팀프로젝트 진행 / git에서 개인 실행 및 저장
+- 도서정보나루 api 데이터 json 파싱/ xml 파싱 데이터 insert
 
 2. 사용 API
 - ibm watson assistant
