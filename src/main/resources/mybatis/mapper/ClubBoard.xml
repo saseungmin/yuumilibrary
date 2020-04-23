@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuumilibrary.club.dao.IClubBoardDao">
+
+	<sql id="listSearch">
+		<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(searchWord)
+		 			and @org.apache.commons.lang3.StringUtils@isNotBlank(searchType)">
+			<choose>
+				<when test='searchType.equals("titleSearch")'>
+					AND cb_bo_title LIKE '%' || #{searchWord} || '%'
+				</when>
+				<when test='searchType.equals("titleSearch")'>
+					AND cb_bo_writer LIKE '%' || #{searchWord} || '%'
+				</when>
+			</choose>
+		</if>
+	</sql>
+
+
+
+	<select
+		id="getBoardCount"
+		parameterType="com.yuumilibrary.club.vo.ClubSearchVO"
+		resultType="int">
+		SELECT count(*)
+		FROM club_board
+		WHERE cb_Bo_Club_Num = #{cbBoClubNum}
+		<include refid="listSearch" />
+	</select>
+
+	<select
+		id="getBoardList"
+		parameterType="com.yuumilibrary.club.vo.ClubSearchVO"
+		resultType="com.yuumilibrary.club.vo.ClubBoardVO">
+		<include refid="common.PRE_PAGING_QRY" />
+		SELECT
+		cb_bo_num
+		, cb_bo_club_num
+		, CB_BO_MEM_ID
+		, cb_bo_writer
+		, cb_bo_title
+		, cb_bo_content
+		, cb_bo_reg_date
+		, cb_bo_mod_date
+		, cb_bo_hit
+		, cb_bo_notice
+
+		FROM
+		club_board
+		WHERE cb_bo_club_num = #{cbBoClubNum}
+		<include refid="listSearch" />
+		ORDER BY cb_bo_num DESC
+		<include refid="common.POST_PAGING_QRY" />
+	</select>
+
+	<select
+		id="getBoard"
+		parameterType="hashmap"
+		resultType="com.yuumilibrary.club.vo.ClubBoardVO">
+		SELECT
+		cb_bo_num
+		, cb_bo_club_num
+		, cb_bo_title
+		, cb_bo_mem_id
+		, cb_bo_writer
+		, cb_bo_content
+		, cb_bo_reg_date
+		, cb_bo_mod_date
+		, cb_bo_hit
+		, cb_bo_notice
+
+		FROM
+		club_board
+
+		WHERE cb_bo_num = #{boNum}
+		and cb_bo_club_num = #{cbBoClubNum}
+	</select>
+
+	<insert
+		id="registBoard"
+		parameterType="com.yuumilibrary.club.vo.ClubBoardVO">
+
+		<selectKey
+			keyProperty="cbBoNum"
+			resultType="java.lang.Integer"
+			order="AFTER">
+			SELECT nvl(max(cb_bo_num),0) as cb_bo_num
+			FROM club_board
+			WHERE cb_bo_club_num = #{cbBoClubNum}
+			AND cb_bo_notice= #{cbBoNotice}
+		</selectKey>
+
+		INSERT INTO club_board(
+		cb_bo_num
+		, cb_bo_mem_id
+		, cb_Bo_Writer
+		, cb_Bo_Title
+		, cb_Bo_Reg_Date
+		, cb_Bo_Mod_Date
+		, cb_Bo_Content
+		, cb_bo_club_num
+		, cb_bo_hit
+		, cb_bo_notice
+		) VALUES (
+		<if test="cbBoNotice==0">
+			(select nvl(max(cb_bo_num),0) + 1
+			from club_board
+			where cb_bo_club_num = #{cbBoClubNum}
+			and cb_bo_notice = 0
+			)
+			, #{cbBoMemId}
+			, #{cbBoWriter}
+			, #{cbBoTitle}
+			, TO_CHAR(sysdate, 'YYYY-MM-DD')
+			, null
+			, #{cbBoContent}
+			, #{cbBoClubNum}
+			, 0
+			, #{cbBoNotice}
+			)
+		</if>
+		<if test="cbBoNotice==1">
+			(select nvl(max(cb_bo_num),0) + 1
+			from club_board
+			where cb_bo_club_num = #{cbBoClubNum}
+			and cb_bo_notice = 1
+			)
+			, #{cbBoMemId}
+			, #{cbBoWriter}
+			, #{cbBoTitle}
+			, TO_CHAR(sysdate, 'YYYY-MM-DD')
+			, null
+			, #{cbBoContent}
+			, #{cbBoClubNum}
+			, 0
+			, #{cbBoNotice}
+			)
+		</if>
+	</insert>
+
+	<update
+		id="modifyBoard"
+		parameterType="com.yuumilibrary.club.vo.ClubBoardVO">
+		UPDATE club_board
+		SET
+		cb_bo_title = #{cbBoTitle}
+		, cb_bo_content = #{cbBoContent}
+		, cb_bo_mod_date = TO_CHAR(sysdate, 'YYYY-MM-DD')
+
+		WHERE cb_bo_num = #{cbBoNum}
+		AND cb_bo_mem_id = #{cbBoMemId}
+		AND cb_bo_club_num = #{cbBoClubNum}
+	</update>
+
+	<delete
+		id="removeBoard"
+		parameterType="com.yuumilibrary.club.vo.ClubBoardVO">
+		DELETE FROM club_board
+		WHERE cb_bo_num = #{cbBoNum}
+		AND cb_bo_mem_id = #{cbBoMemId}
+		AND cb_bo_club_num = #{cbBoClubNum}
+	</delete>
+
+	<update
+		id="increaseHit"
+		parameterType="hashmap">
+		UPDATE club_board
+		SET cb_bo_hit = cb_bo_hit + 1
+		WHERE cb_bo_num = #{cbBoNum}
+		AND CB_BO_CLUB_NUM = #{cbBoClubNum}
+	</update>
+
+	<!-- 어떠한 회원이 어떠한 클럽게시판에 접근할 경우 확인하기위한 쿼리 (0이면 조회거부) -->
+	<select
+		id="searchClubMemberCount"
+		resultType="int">
+		select count(*)
+		from club_memberlist
+		where mem_id = #{memberId}
+		and confirm_yn = 'Y'
+	</select>
+
+
+	<select
+		id="insertAttach"
+		parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+		atch_no
+		, atch_parent_no
+		, atch_category
+		, atch_file_name
+		, atch_original_name
+		, atch_file_size
+		, atch_fancy_size
+		, atch_content_type
+		, atch_path
+		, atch_down_cnt
+		, atch_del_yn
+		, atch_reg_date
+		, atch_parent_category
+		FROM attach
+		WHERE atch_parent_no = #{boNum}
+		AND atch_parent_category= #{cbBoNotice}
+		AND ATCH_CATEGORY = #{atchCategory}
+		AND ATCH_DEL_YN ='N'
+
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

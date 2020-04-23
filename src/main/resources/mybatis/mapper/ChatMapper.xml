@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yuumilibrary.chat.dao.IChatDAO">
+
+
+
+	<insert id="insertMessage" parameterType="com.yuumilibrary.chat.vo.ChatMessageVO">
+	
+		INSERT INTO club_chat (
+      				club_user_id
+    			  , club_message_content
+    			  , club_message_sendtime
+    			  , club_room_num
+                  , club_room_name
+				) VALUES (
+					#{clubUserId},
+				    #{clubMessageContent}, 
+					sysdate, 
+					#{clubRoomNum},
+					#{clubRoomName}
+				)
+	
+	</insert>
+
+	<select id="getChatMember" resultType="com.yuumilibrary.club.vo.ClubMemberListVO" parameterType="map">
+	
+		SELECT a.cm_num , a.cm_club_name , a.cm_mem_id ,b.mem_img as cm_mem_img
+		FROM club_memberlist a , member b
+		WHERE a.cm_mem_id = #{memId}
+		AND a.cm_num = #{cmNum}
+		AND a.cm_confirm_yn='Y'
+        AND a.cm_mem_id = b.mem_id
+        AND b.mem_del_yn ='N'
+        
+	</select>
+	
+	
+	<select id="getMessage" resultType="com.yuumilibrary.chat.vo.ChatMessageVO">
+	
+        SELECT a.club_user_id, 
+			   a.club_message_content, 
+			   to_char(a.club_message_sendtime,'PM HH:MI') as club_message_sendtime, 
+               to_char(a.club_message_sendtime,'YYYY-mm-DD') as club_message_senddate, 
+			   b.MEM_IMG as club_user_img
+		FROM club_chat a, member b
+		WHERE a.CLUB_ROOM_NUM = #{clubNum}
+		AND a.club_user_id =b.mem_id
+		AND b.mem_del_yn = 'N'
+		ORDER BY a.club_message_sendtime
+
+			
+	</select>
+
+
+	<select id="getClubCheckMember" resultType="com.yuumilibrary.club.vo.ClubMemberListVO">
+	
+		SELECT cm_num
+		      ,cm_club_name
+		      ,cm_mem_id
+		      ,cm_confirm_yn
+		FROM club_memberList
+		WHERE cm_num = #{cmNum}
+		AND cm_mem_id = #{cmMemId}
+		AND cm_confirm_yn = 'Y'
+	</select>
+
+</mapper>

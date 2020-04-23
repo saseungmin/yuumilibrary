@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuumilibrary.library.dao.ILibraryDao">
+
+	<select id="getLibraryCount"
+		parameterType="com.yuumilibrary.library.vo.LibrarySearchVO"
+		resultType="int">
+
+		select count(*)
+		from library
+		where lib_name like '%' || #{searchWord} || '%'
+
+	</select>
+
+	<select id="getLibraryList"
+		parameterType="com.yuumilibrary.library.vo.LibrarySearchVO"
+		resultType="com.yuumilibrary.library.vo.LibraryListVO">
+		<include refid="common.PRE_PAGING_QRY" />
+		SELECT
+		lib_code
+		,lib_name
+		,lib_add
+		,lib_tel
+		,lib_time
+		,lib_url
+		FROM library
+
+		<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(searchWord)">
+			WHERE lib_name like '%' || #{searchWord} || '%'
+		</if>
+		<include refid="common.POST_PAGING_QRY"/>
+	</select>
+
+	<select id="getLibraryDetail"
+		parameterType="com.yuumilibrary.library.vo.LibraryListVO"
+		resultType="com.yuumilibrary.library.vo.LibraryListVO">
+		select *
+		from library
+		where lib_code = #{libCode}
+	</select>
+</mapper>

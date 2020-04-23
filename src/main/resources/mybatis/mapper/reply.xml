@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--freeBoardMapper.xml -->
+<!-- namespace 속성은 해당 인터페이스 완전한 이름을 사용 -->
+
+<mapper namespace="com.yuumilibrary.reply.dao.IReplyDao">
+	<select
+		id="getReplyList"
+		parameterType="com.yuumilibrary.reply.vo.ReplyVO"
+		resultType="com.yuumilibrary.reply.vo.ReplyVO">
+		SELECT re_num
+			  ,re_group_num
+			  ,re_depth
+			  ,re_order
+			  ,re_mem_id
+			  ,re_writer
+			  ,re_reg_date
+			  ,re_mod_date
+			  ,re_content
+			  ,re_del_yn
+		FROM  reply
+		WHERE re_category = #{reCategory}
+		AND   re_board_num = #{reBoardNum}
+	 ORDER BY re_group_num, re_order, re_depth ASC
+	</select>
+	
+
+	<!-- 그냥 댓글달때(대댓글아님) -->
+	<insert
+		id="insertReply"
+		parameterType="com.yuumilibrary.reply.vo.ReplyVO">
+		
+		INSERT INTO reply(
+						  re_num
+					    , re_board_num
+					    , re_category
+					    , re_group_num
+					    , re_depth
+					    , re_order
+					    , re_mem_id
+					    , re_writer
+					    , re_reg_date
+					    , re_mod_date
+					    , re_content
+					    , re_img
+					    
+					     ) VALUES (
+					     
+					      (select nvl(max(re_num),0) + 1 from reply)
+					    , #{reBoardNum}
+					    , #{reCategory}
+					    
+					    ,( select  case when b.cnt  = 0  then 1                
+           							    when b.cnt != 0  then b.cnt  + 1        
+        						   end as k
+						   from ( select nvl(max(re_group_num),0) as cnt
+                                  from reply 
+       					 		  where re_category = #{reCategory}
+       							  and   re_board_num = #{reBoardNum} ) b )
+						    
+						, 1   
+						, 1
+						, #{reMemId}
+						, #{reWriter}
+						, TO_CHAR(sysdate,'YY-MM-DD HH24:MI')
+						, null
+						,#{reContent}
+						,( SELECT mem_img
+                 FROM member
+                WHERE mem_id = #{reMemId}
+                  AND mem_del_yn = 'N')
+						)
+	</insert>
+	
+	
+	
+	
+	<!-- 해당 인서트를 실행하기전에 꼭 updateOrder 하기!! -->
+	<insert
+		id="insertReplyDeeper"
+		parameterType="com.yuumilibrary.reply.vo.ReplyVO">
+		
+		INSERT INTO reply(
+						  re_num
+					    , re_board_num
+					    , re_category
+					    , re_group_num
+					    , re_depth
+					    , re_order
+					    , re_mem_id
+					    , re_writer
+					    , re_reg_date
+					    , re_mod_date
+					    , re_content
+					    , re_img
+					    
+					     ) VALUES (
+					      (select nvl(max(re_num),0) + 1 from reply)
+					    , #{reBoardNum}
+					    , #{reCategory}
+					    , #{reGroupNum}
+					    , #{reDepth} + 1
+					    , #{reOrder} + 1
+					    , #{reMemId}
+					    , #{reWriter}
+					    , TO_CHAR(sysdate,'YY-MM-DD HH24:MI')
+					    , null
+					    , #{reContent}
+   						,( SELECT mem_img
+                 FROM member
+                WHERE mem_id = #{reMemId}
+                  AND mem_del_yn = 'N')
+					     		  )
+	</insert>
+
+	<!-- 대댓글을 쓸때 꼭 먼저 써야된느 쿼리 -->	
+	<update id="updateOrder"
+	 		parameterType="com.yuumilibrary.reply.vo.ReplyVO">
+	
+	UPDATE reply
+	SET   re_order = case when re_order >= #{reOrder} + 1 then re_order + 1
+                          else re_order + 0
+		  end
+	WHERE re_board_num = #{reBoardNum}
+	  AND re_category = #{reCategory}
+	  AND re_group_num = #{reGroupNum}
+	  
+	</update>
+	
+	
+	
+
+	<update
+		id="modifyReply"
+		parameterType="com.yuumilibrary.reply.vo.ReplyVO">
+		UPDATE reply
+		SET    re_content = #{reContent}
+			  ,re_mod_date = TO_CHAR(sysdate,'YY-MM-DD HH24:MI')
+		WHERE re_num = #{reNum}
+	</update>
+
+	<update
+		id="deleteReply"
+		parameterType="com.yuumilibrary.reply.vo.ReplyVO">
+		
+		UPDATE reply
+		SET    re_content = #{reContent}
+		     , re_mod_date = TO_CHAR(sysdate,'YYYY-MM-DD HH24:MI')
+		     , re_del_yn = 'Y'
+		WHERE  re_num = #{reNum}
+	</update>
+</mapper> 

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--freeBoardMapper.xml -->
+<!-- namespace 속성은 해당 인터페이스 완전한 이름을 사용 -->
+<mapper namespace="com.yuumilibrary.attach.dao.IAttachDao">
+
+	<insert id="insertAttach" parameterType="com.yuumilibrary.attach.vo.AttachVO">
+			<selectKey keyProperty="atchNo" resultType="int" order="BEFORE">
+					 	SELECT seq_attach.nextval
+					 	FROM dual
+			</selectKey>
+	
+		INSERT INTO attach (
+		      atch_no , atch_parent_no   , atch_category
+		    , atch_file_name    , atch_original_name    , atch_file_size  
+		    , atch_fancy_size    , atch_content_type    , atch_path
+		    , atch_down_cnt    , atch_del_yn    , atch_reg_date
+		    , atch_parent_category
+		) VALUES (
+			 #{atchNo} , #{atchParentNo}, #{atchCategory}
+			,#{atchFileName}, #{atchOriginalName}, #{atchFileSize}
+			,#{atchFancySize},#{atchContentType},#{atchPath}
+			,#{atchDownCnt}, 'N', sysdate
+			,#{atchParentCategory}
+		)
+			
+	
+	</insert>
+	
+	<select id="selectAttachByParentNo" parameterType="hashmap" resultType="hashmap">
+		
+		SELECT
+		      atch_no
+		    , atch_parent_no
+		    , atch_category
+		    , atch_file_name
+		    , atch_original_name
+		    , atch_file_size
+		    , atch_fancy_size
+		    , atch_content_type
+		    , atch_path
+		    , atch_down_cnt
+		    , atch_del_yn
+		    , atch_reg_date
+		    , atch_parent_category
+		 FROM attach
+		WHERE atch_parent_no = #{boNum} 
+		  AND atch_parent_category=#{boNotice}
+		  AND ATCH_CATEGORY = #{atchCategory}
+		  AND ATCH_DEL_YN ='N'  
+	
+	</select>
+	
+	<select id="selectAttach" parameterType="hashmap" resultType="com.yuumilibrary.attach.vo.AttachVO">
+		SELECT
+		      atch_no
+		    , atch_parent_no
+		    , atch_category
+		    , atch_file_name
+		    , atch_original_name
+		    , atch_file_size
+		    , atch_fancy_size
+		    , atch_content_type
+		    , atch_path
+		    , atch_down_cnt
+		    , atch_del_yn
+		    , atch_reg_date
+		    , atch_parent_category
+		FROM
+		    attach
+		WHERE ATCH_NO = #{atchNo}
+ 
+	</select>
+	
+	<update id="increaseDownloadCount" parameterType="hashmap">
+		UPDATE attach
+		   SET atch_down_cnt = atch_down_cnt +1
+		 WHERE ATCH_NO = #{atchNo}
+ 
+		  	
+	</update>
+	
+	
+	<delete id="deleteAttach" parameterType="int">
+		UPDATE attach
+		   SET ATCH_DEL_YN = 'Y'
+	 	 WHERE ATCH_NO = #{atchNo}
+	</delete>
+	
+	<delete id="deleteAttaches" parameterType="java.util.List">
+		UPDATE attach
+		   SET ATCH_DEL_YN = 'Y'		   
+		<where>
+			<if test="array == null">
+				1 = 0
+			</if>
+			<if test="array != null">
+				<foreach collection="array" item="num" open="ATCH_NO in (" close=")" separator=",">
+				 #{num}
+				</foreach>
+			</if>
+		</where>
+	</delete>
+
+	
+</mapper> 

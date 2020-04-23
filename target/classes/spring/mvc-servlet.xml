@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:websocket="http://www.springframework.org/schema/websocket"
+	xsi:schemaLocation="http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd
+		http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
+	
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<!--  @MVC를 위한 기본 설정을 자동으로 처리 -->
+	<annotation-driven />
+	
+	
+	<!-- 요청을 HandlerMapper에 존재하지 않을 경우 WAS에 default-servlet에 위임
+		확장자 매핑에서는 불필요
+		정적자원(js,css,img등)을 처리하기 위해 기술
+	 -->
+	<default-servlet-handler/>
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
+	<!-- 정적자원(js,css,img등)을 처리하기 위해 기술 
+			요청경로와 실제 경로가 다르게 처리 가능 
+	 -->
+	<resources mapping="/resources/**" location="/resources/" />
+	<resources mapping="/js/**" location="/js/" />
+	<resources mapping="/bootstrap3/**" location="/bootstrap3/" />
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
+	<beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+	
+	<beans:bean id="chatHandler" class="com.yuumilibrary.chat.dao.FreeChatHandler" />
+	
+	
+	<websocket:handlers>
+		<websocket:mapping handler="chatHandler" path="/chat"/>
+		<websocket:handshake-interceptors>
+			<beans:bean class="org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor" />
+		</websocket:handshake-interceptors>
+		<websocket:sockjs />
+	</websocket:handlers>
+	
+	
+	<beans:bean id="clubChatHandler" class="com.yuumilibrary.chat.dao.ClubChatHandler" />
+	
+	
+	<websocket:handlers>
+		<websocket:mapping handler="clubChatHandler" path="/clubChat"/>
+		<websocket:handshake-interceptors>
+			<beans:bean class="org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor" />
+		</websocket:handshake-interceptors>
+		<websocket:sockjs />
+	</websocket:handlers>	
+	
+	
+	
+	<beans:bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<beans:property name="maxUploadSize" value="1073741824" /> <!-- 1Gb -->
+		<beans:property name="maxUploadSizePerFile" value="104857600" /> <!-- 100Mb -->
+		<beans:property name="maxInMemorySize" value="32000" /> <!-- 8Kb -->
+	</beans:bean> 
+	
+	
+	<!-- <beans:bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver" /> -->
+	
+	<beans:bean id="uploadPath" class="java.lang.String">
+		<beans:constructor-arg value="/home/pc42/CICD/tomcat9/webapps/ROOT/image/userProfileImg" />
+	</beans:bean>
+	
+	
+	<beans:bean id="clubImgPath" class="java.lang.String">
+		<beans:constructor-arg value="/home/pc42/CICD/tomcat9/webapps/ROOT/image/clubProfileImg" />
+	</beans:bean>
+	
+	
+	<!-- <view-controller path= "/upload/form" view-name="uploadForm" /> -->
+	
+	
+	<!--  @MVC @컴포넌트를 검색하여 빈으로 등록
+	<@Component, @Repository, @Service, @Controller>★★★, @RestController, 
+ 	@ControllerAdvice, and @Configuration
+	  use-default-filters="true" 기본이여서 모든 @컴포넌트 등록한다.
+	  -->
+	<context:component-scan base-package="com.yuumilibrary" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>	
+ 	</context:component-scan>
+ 	
+	
+	
+</beans:beans>

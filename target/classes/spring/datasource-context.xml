@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd">
+
+																						<!-- 커넥션 닫을 때 사용 -->
+<bean id="basicDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+	<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+	<property name="url" value="jdbc:oracle:thin:@192.168.20.65:1521:xe"/>
+	<property name="username" value="team" />
+	<property name="password" value="team" />
+	<property name="maxTotal" value="4" />
+	<property name="maxIdle" value="4" />
+	<property name="minIdle" value="4" />
+	<property name="validationQuery" value="select 1 from dual" />
+	
+</bean>
+<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<property name="dataSource" ref="basicDataSource" />
+	<property name="configLocation" value="classpath:mybatis/mybatis-config.xml" />
+	<property name="mapperLocations" value="classpath:mybatis/mapper/*.xml" />
+	
+	<!-- 자동매퍼설정을 할 것임으로 sqlsessiontemplate 필요없음 -->
+	<!-- 패키지이하의 인터페이스를 구현하려고 합니다. -->
+</bean>
+<!-- <mybatis-spring:scan base-package="com.study" annotation="org.apache.ibatis.annotations.Mapper"/> -->
+<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+  <property name="basePackage" value="com.yuumilibrary" />
+  <property name="annotationClass" value="org.apache.ibatis.annotations.Mapper" />
+</bean>
+
+</beans>

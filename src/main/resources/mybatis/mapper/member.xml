@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <!-- member.xml -->
+ 	<!-- namespace 는 해당 인터페이스 완전한 이름을 사용 -->
+
+
+  <mapper namespace="com.yuumilibrary.member.dao.IMemberDao">
+  	<sql id="whereSearchClause">
+		<!-- 외부 유틸클래스의 메소드를 사용하려면
+			@완전한 이름클래스@메소드 -->
+		<!-- <if test="searchWord != null and searchWord != '' and searchType != null and searchType != ''"> -->
+		 <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(searchWord)
+		 			and @org.apache.commons.lang3.StringUtils@isNotBlank(searchType)">
+			<choose>
+				<when test='searchType.equals("I")'>
+					AND  mem_id  LIKE '%' || #{searchWord} || '%'
+				</when>
+				<when test='searchType.equals("Z")'>
+					AND  mem_name 	LIKE '%' || #{searchWord} || '%'
+				</when>
+			</choose>
+		</if>
+	</sql>
+	
+  
+  		<select id="getMemberCount" parameterType="com.yuumilibrary.member.vo.MemberSearchVO" resultType="int">
+ 				SELECT 	count(*)
+				  FROM  member
+				 WHERE  mem_del_yn = 'N'
+			<include refid="whereSearchClause" />
+			
+  		</select>
+  		
+		<!-- 엑셀용 쿼리 -->
+		<select id="getMemberListForExcel" resultType="com.yuumilibrary.member.vo.MemberVO">
+			SELECT  a.mem_id
+			    , a.mem_name
+			    , a.mem_pass
+			    , a.mem_salt
+			    , a.mem_zip
+			    , a.mem_add1
+			    , a.mem_add2
+			    , a.mem_bir
+			    , a.mem_mail
+			    , a.mem_mail_yn
+			    , a.mem_hp
+			    , a.mem_hp_yn
+			    , a.mem_rank
+			    , a.mem_pref
+			    , b.comm_nm				as mem_pref_nm
+			    , a.mem_del_yn
+			FROM  member a, comm_code b
+			WHERE a.mem_del_yn = 'N'
+			  AND a.mem_pref = b.comm_cd
+			  ORDER BY a.mem_rank ASC
+  		</select>
+  
+  	<select id="getMemberList" parameterType="com.yuumilibrary.member.vo.MemberSearchVO"
+  					resultType="com.yuumilibrary.member.vo.MemberVO">
+  	<include refid="common.PRE_PAGING_QRY" />
+ 				SELECT  a.mem_id
+					    , a.mem_name
+					    , a.mem_pass
+					    , a.mem_salt
+					    , a.mem_zip
+					    , a.mem_add1
+					    , a.mem_add2
+					    , a.mem_bir
+					    , a.mem_mail
+					    , a.mem_mail_yn
+					    , a.mem_hp
+					    , a.mem_hp_yn
+					    , a.mem_rank
+					    , a.mem_pref
+					    , b.comm_nm				as mem_pref_nm
+					    , a.mem_del_yn
+					FROM  member a, comm_code b
+					WHERE a.mem_del_yn = 'N'
+					  AND a.mem_pref = b.comm_cd
+		<include refid="whereSearchClause" />
+			 ORDER BY a.mem_rank ASC
+  	<include refid="common.POST_PAGING_QRY"/>
+  	</select>
+  
+  
+		<select id="getMemberVO" parameterType="String"
+						resultType="com.yuumilibrary.member.vo.MemberVO">
+    				SELECT  a.mem_id
+					    , a.mem_name
+              			, b.mem_privatekey
+					    , a.mem_pass
+					    , a.mem_salt
+					    , a.mem_zip
+					    , a.mem_add1
+					    , a.mem_add2
+					    , a.mem_bir
+					    , a.mem_mail
+					    , a.mem_mail_yn
+					    , a.mem_hp
+					    , a.mem_hp_yn
+					    , a.mem_rank
+					    , a.mem_pref
+					    , c.comm_nm         as mem_pref_nm
+					    , a.mem_del_yn
+					    , a.mem_img
+			     FROM member a, pwkey b, comm_code c
+	  	    WHERE a.mem_id = #{memId}
+ 			      AND a.mem_del_yn = 'N'
+            AND a.mem_id=b.mem_id     
+            AND a.mem_pref = c.comm_cd  
+		</select>
+	
+		
+		<insert id="insertMember" parameterType="com.yuumilibrary.member.vo.MemberVO">
+
+				INSERT INTO member (
+					    mem_rank ,mem_id,  mem_pass, mem_name, mem_salt,
+					    mem_bir, mem_zip,  mem_add1, mem_add2,
+					    mem_hp,  mem_hp_yn, mem_mail,  mem_mail_yn,     
+						mem_pref, mem_del_yn, mem_img
+					) VALUES (
+					     #{memRank} ,#{memId},#{memPass},#{memName},#{memSalt}
+					    ,#{memBir},#{memZip},#{memAdd1},#{memAdd2}
+					    ,#{memHp},#{memHpYn},#{memMail},#{memMailYn}
+					    ,#{memPref},'N',null
+					)
+					
+		</insert>
+		
+		<update id="updateMember" parameterType="com.yuumilibrary.member.vo.MemberVO">
+	 UPDATE member
+  		SET mem_name = #{memName}
+				 ,mem_zip  = #{memZip}
+				 ,mem_add1 = #{memAdd1}
+				 ,mem_add2 = #{memAdd2}
+				 ,mem_bir  = #{memBir}
+				 ,mem_mail = #{memMail}
+				 ,mem_hp   = #{memHp}
+				 ,mem_pref = #{memPref}
+    WHERE mem_id   = #{memId} 
+      AND to_char(mem_pass) = #{memPass}
+      
+		</update>
+		
+		<insert id="privateKeyMember">
+		
+			INSERT INTO pwkey(
+					MEM_ID, MEM_PRIVATEKEY
+			)VALUES(
+				#{memId},#{memPrivateKey}
+			)
+			
+		</insert>
+		
+		<delete id="deleteMember">
+			UPDATE member
+				 SET mem_del_yn = 'Y'
+		   WHERE mem_id = #{memId}
+		     AND to_char(mem_pass) = #{memPass}
+		</delete>
+		
+		<delete id="deletePrivatKey" parameterType="String">
+			delete from pwkey
+			where mem_id=#{memId}
+		
+		</delete>
+		
+		<update id="updateMemberImg" parameterType="com.yuumilibrary.member.vo.MemberVO">
+			UPDATE member
+				SET MEM_IMG = #{memImg}
+			WHERE mem_id= #{memId}
+			AND	mem_del_yn = 'N'
+		</update>
+		
+		
+  </mapper>

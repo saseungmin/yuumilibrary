@@ -1,0 +1,94 @@
+	body {
+		   color: black;
+		
+		}
+
+		.portfolio {
+		  padding:6%;
+		  text-align:center;
+		}
+		.heading {
+		  background:#fff;
+		  padding:1%;
+		  text-align:left;
+		  box-shadow:0px 0px 4px 0px #545b62;
+		}
+		
+		.heading img {
+		  width:10%;
+		}
+		
+		.bio-info {
+		  padding:5%;
+		  background:#dee2e6;
+		  box-shadow:0px 0px 4px 0px #b0b3b7;		  
+		}
+		
+		.name {
+		  font-family:'Charmonman', cursive;
+		  font-weight:600;
+		}
+		
+		
+			html,body{
+			height: 100%;
+		}
+       .container{
+       	height: 100%;
+       	align-content: center;
+       }
+
+       .image_outer_container{
+       	margin-top: auto;
+       	margin-bottom: auto;
+       	border-radius: 50%;
+       	position: relative;
+       }
+
+       .image_inner_container{
+       	margin-top: 20px;
+       	border-radius: 50%;
+       	padding: 5px;
+        background: #833ab4; 
+        background: -webkit-linear-gradient(to bottom, #fcb045, #fd1d1d, #833ab4); 
+        background: linear-gradient(to bottom, #fcb045, #fd1d1d, #833ab4);
+       }
+       .image_inner_container img{
+       	height: 230px;
+       	width: 230px;
+       	border-radius: 50%;
+       	border: 5px solid white;
+       }
+
+       .image_outer_container .green_icon{
+         background-color: #4cd137;
+         position: absolute;
+         right: 30px;
+         bottom: 10px;
+         height: 30px;
+         width: 30px;
+         border:5px solid white;
+         border-radius: 50%;
+       }
+		
+		.bio-content {
+		  text-align:left;
+		}
+		
+		.bio-content p {
+		  font-weight:600;
+		  font-size:30px;
+		}
+		.text-left{
+		    margin-top: 150px;
+		
+		}
+
+		#fileUploadLabel{
+			margin-left: 100px;
+    		margin-right: 10px;
+		}
+
+		#upload-file-info{
+			margin-top: 5px;
+		}

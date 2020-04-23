@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+
+<!-- @Controller 를 제외한 모든 빈을 등록 -->
+<context:component-scan base-package="com.yuumilibrary" use-default-filters="true" >
+<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+</context:component-scan>
+<!-- 설정정보를 담은 프러퍼티 파일 등록 -->
+<util:properties id="app" location="classpath:appconfig.properties" />
+	
+	
+</beans:beans>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<!-- Appenders -->
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<layout class="org.apache.log4j.EnhancedPatternLayout">
+			<param name="ConversionPattern" value="%-5p: %C{2}.%M %L - %m%n" />
+		</layout>
+	</appender>
+	
+	<!-- 파일 어팬더의 하위 어팬더를 검색해서 일별 주별 월별 로 저장하게 -->
+    <!--  날짜별 로그 -->  
+    <appender name="dailyout" class="org.apache.log4j.DailyRollingFileAppender">  
+        <!-- 이것은 날짜별로  로그를 남김. 파일명.확장자.DatePattern으로 정의 함-->  
+        <param name="file" value="/home/pc21/log/FinalProject.log" />  
+        <param name="Append" value="true"/>  
+        <!-- value의 패턴으로 기록 주기를 설정 한다. -->
+        <param name="DatePattern" value="'.'yyMMdd"/>  
+        <layout class="org.apache.log4j.PatternLayout">  
+            <param name="ConversionPattern" value="%t> [%d{yyyy-MM-dd HH:mm:ss}] [%c{1}] [%L] [%p] %m %n"/>  
+        </layout>  
+    </appender>
+	
+	
+	
+	<!-- Application Loggers -->
+	<logger name="com.yuumilibrary">
+		<level value="debug" />
+	</logger>
+	
+	<!-- 3rdparty Loggers -->
+	<logger name="org.springframework.core">
+		<level value="info" />
+	</logger>
+	
+	<logger name="org.springframework.beans">
+		<level value="warn" />
+	</logger>
+	
+	<logger name="org.springframework.context">
+		<level value="info" />
+	</logger>
+
+	<logger name="org.springframework.web">
+		<level value="info" />
+	</logger>
+
+	<!-- Root Logger -->
+	<root>
+		<priority value="warn" />
+		<appender-ref ref="console" />
+		<!-- <appender-ref ref="dailyout"/>  -->
+	</root>
+	
+</log4j:configuration>

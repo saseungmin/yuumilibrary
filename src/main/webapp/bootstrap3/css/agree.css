@@ -1,0 +1,13 @@
+@import url(http://fonts.googleapis.com/earlyaccess/nanumgothic.css);
+*{
+	font-family: 'Nanum Gothic';
+}
+
+div{
+    padding: 5px;
+}
+hr{
+    border: 0;
+    height: 3px;
+    background: #ccc;
+}
