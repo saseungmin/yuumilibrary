@@ -1,6 +1,7 @@
 # yuumilibrary
 
 1. yuumi 도서관 관리/모임/대출 종합 시스템
+- linux mint
 - spring framework / jenkins / maven
 - tomcat 9.0 / mybatis 
 - java / javascript / jQuery 
